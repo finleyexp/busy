@@ -84,7 +84,7 @@ class MessageList extends Component {
           key="infinite-scrolling"
           list={messageEls}
           preloadBatchSize={Infinite.containerHeightScaleFactor(2)}
-          infiniteLoadBeginEdgeOffset={-112}
+          infiniteLoadBeginEdgeOffset={1}
           loadingSpinnerDelegate={
             <div className="text-center">Loading More messages</div>
           }
