@@ -68,7 +68,7 @@ export default class MessageDateGroup extends Component {
 
         {this.props.model.messages.map((userGroup, i) => (
           <MessageGroup
-            key={[userGroup.key, i]}
+            key={userGroup.key}
             model={userGroup.messages}
           />
         ))}

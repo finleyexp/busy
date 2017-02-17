@@ -104,7 +104,7 @@ export default function messagesReducer(state = initialState, action) {
       });
       // action.payload.origin = 'USER_MESSAGE';
       channel.latest = uniqBy(
-        (channel.latest || []).concat([action.payload]),
+        (channel.latest || []).concat(action.payload),
         'uuid'
       );
 
@@ -165,8 +165,7 @@ export default function messagesReducer(state = initialState, action) {
       };
       console.log(channel)
 
-      const latest = (channel.latest || []);
-      action.payload.latest.forEach((msg) => latest.push(msg));
+      const latest = uniqBy((channel.latest || []).concat(action.payload.latest), 'uuid');
 
       return extend({}, state, {
         isLoading: false,

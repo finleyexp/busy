@@ -5,11 +5,52 @@ import InfiniteAnyHeight from 'react-infinite-any-height';
 import map from 'lodash/map';
 import debounce from 'lodash/debounce';
 import { connect } from 'react-redux';
+import ReduxInfiniteScroll from 'redux-infinite-scroll';
 
 import './MessageList.scss';
 import MessageDateGroup from './MessageDateGroup';
 import { groupMessagesByDate } from './messageGroupHelpers';
 import { sendReadAcknoledgement } from './messagesActions';
+
+
+class InfiniteScroll extends Component {
+  renderLoader() {
+    if (!this.props.loadingMore) return null;
+    return this.props.loader;
+  }
+
+  componentDidMount() {
+    window.addEventListener('scroll', this.scrollFunction, true);
+    window.addEventListener('resize', this.scrollFunction, true);
+  }
+
+  componentDidUpdate() {
+    window.addEventListener('scroll', this.scrollFunction, true);
+    window.addEventListener('resize', this.scrollFunction, true);
+  }
+
+  scrollFunction = () => {
+    if (this.props.loadingMore) return;
+    if (!this.props.children || this.props.children.length === 0) return;
+
+    const topPosition = (window.pageYOffset !== undefined)
+      ? window.pageYOffset
+      : (document.documentElement || document.body.parentNode || document.body).scrollTop;
+    console.log(topPosition);
+    if (topPosition < 100) {
+      this.props.loadMore();
+    }
+  };
+
+  render() {
+    return (
+      <div>
+        {this.renderLoader()}
+        {this.props.children}
+      </div>
+    );
+  }
+}
 
 class MessageList extends Component {
   static propTypes = {
@@ -42,9 +83,9 @@ class MessageList extends Component {
   componentDidUpdate() {
     this.sendReadAcks();
 
-    // document.body.scrollTop = document.body.scrollHeight;
-    // // Firefox Compatibility while document.scrollingElement isn't available
-    // document.documentElement.scrollTop = document.documentElement.scrollHeight;
+    document.body.scrollTop = document.body.scrollHeight;
+    // Firefox Compatibility while document.scrollingElement isn't available
+    document.documentElement.scrollTop = document.documentElement.scrollHeight;
   }
 
   onResize = debounce(() => {
@@ -58,7 +99,7 @@ class MessageList extends Component {
     const dateGroups = groupMessagesByDate(messages);
     const messageEls = map(dateGroups, (dateGroup, i) => (
       <MessageDateGroup
-        key={i}
+        key={dateGroup.day}
         model={dateGroup}
       />
     ));
@@ -80,6 +121,18 @@ class MessageList extends Component {
         </div>
         */}
 
+        <InfiniteScroll
+          loadMore={this.props.fetchMoreMessages}
+          loadingMore={this.props.isLoading}
+          threshold={100}
+          elementIsScrollable={false}
+          loader={
+            <div style={{zIndex: 10}} className="text-center">Loading More messages</div>
+          }
+        >
+          {messageEls}
+        </InfiniteScroll>
+        {/*
         <InfiniteAnyHeight
           key="infinite-scrolling"
           list={messageEls}
@@ -104,6 +157,7 @@ class MessageList extends Component {
           useWindowAsScrollContainer
           containerHeight={window.innerHeight - 112}
         />
+        */}
       </div>
     );
   }
